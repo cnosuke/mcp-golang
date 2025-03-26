@@ -819,6 +819,7 @@ func (s *Server) handleListResources(ctx context.Context, request *transport.Bas
 
 	return ListResourcesResponse{
 		Resources: resourcesToReturn,
+		Templates: []*ResourceTemplateSchema{}, // Empty array for now
 		NextCursor: func() *string {
 			if s.paginationLimit != nil && len(resourcesToReturn) >= *s.paginationLimit {
 				toString := base64.StdEncoding.EncodeToString([]byte(resourcesToReturn[len(resourcesToReturn)-1].Uri))
