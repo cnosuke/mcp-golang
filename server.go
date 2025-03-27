@@ -554,6 +554,7 @@ func (s *Server) Serve() error {
 	pr.SetRequestHandler("prompts/get", s.handlePromptCalls)
 	pr.SetRequestHandler("resources/list", s.handleListResources)
 	pr.SetRequestHandler("resources/read", s.handleResourceCalls)
+	pr.SetRequestHandler("resources/templates/list", s.handleListResourceTemplates)
 	err := pr.Connect(s.transport)
 	if err != nil {
 		return err
@@ -874,6 +875,29 @@ func (s *Server) handleResourceCalls(ctx context.Context, req *transport.BaseJSO
 		return nil, errors.Wrapf(err, "unknown prompt: %s", req.Method)
 	}
 	return resourceToUse.Handler(ctx), nil
+}
+
+func (s *Server) handleListResourceTemplates(ctx context.Context, request *transport.BaseJSONRPCRequest, extra protocol.RequestHandlerExtra) (transport.JsonRpcBody, error) {
+	type resourceTemplateRequestParams struct {
+		Cursor *string `json:"cursor"`
+	}
+	var params resourceTemplateRequestParams
+	if request.Params == nil {
+		params = resourceTemplateRequestParams{}
+	} else {
+		err := json.Unmarshal(request.Params, &params)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal arguments")
+		}
+	}
+
+	// For now, we're just returning an empty list of templates
+	// In the future, resource templates could be registered with the server
+	return ListResourcesResponse{
+		Resources: []*ResourceSchema{},
+		Templates: []*ResourceTemplateSchema{},
+		NextCursor: nil,
+	}, nil
 }
 
 func (s *Server) handlePing(ctx context.Context, request *transport.BaseJSONRPCRequest, extra protocol.RequestHandlerExtra) (transport.JsonRpcBody, error) {
